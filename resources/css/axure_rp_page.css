@@ -97,7 +97,8 @@ div.intcases {
     position:absolute;
     padding: 0px;
     border-radius: 3px;
-    white-space: nowrap;
+    white-space: pre-wrap;
+    max-width: 250px;
 }
 
 div.intcaselink {

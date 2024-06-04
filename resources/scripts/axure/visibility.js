@@ -7,6 +7,10 @@
     var _defaultLimbo = {};
 
     // ******************  Visibility and State Functions ****************** //
+    var _pageNotesEnabled = true;
+    $axure.messageCenter.addMessageListener(function (message, data) {
+        if(message == 'annotationToggle') _pageNotesEnabled = data;
+    });
 
     var _isIdVisible = $ax.visibility.IsIdVisible = function(id) {
         return $ax.visibility.IsVisible(window.document.getElementById(id));
@@ -35,11 +39,13 @@
 
     $ax.visibility.SetVisible = function (element, visible) {
         //not setting display to none to optimize measuring
-        if(visible) {
-            if($(element).hasClass(HIDDEN_CLASS)) $(element).removeClass(HIDDEN_CLASS);
-            if($(element).hasClass(UNPLACED_CLASS)) $(element).removeClass(UNPLACED_CLASS);
+        if (visible) {
+            var jElement = $(element);
+            if(jElement.hasClass(HIDDEN_CLASS)) jElement.removeClass(HIDDEN_CLASS);
+            if(jElement.hasClass(UNPLACED_CLASS)) jElement.removeClass(UNPLACED_CLASS);
             element.style.display = '';
             element.style.visibility = 'inherit';
+            if(jElement.hasClass(SELECTED_ClASS)) $ax.style.SetWidgetSelected(element.id, true);
         } else {
             element.style.display = 'none';
             element.style.visibility = 'hidden';
@@ -103,7 +109,12 @@
 
         //set the visibility of the annotation box as well if it exists
         var ann = document.getElementById(elementId + "_ann");
-        if(ann) _visibility.SetVisible(ann, options.value);
+        if(ann) {
+            _visibility.SetVisible(ann, options.value);
+            var jAnn = $("#" + elementId + "_ann");
+            if(_pageNotesEnabled) jAnn.show();
+            else jAnn.hide();
+        }
 
         //set ref visibility for ref of flow shape, if that exists
         var ref = document.getElementById(elementId + '_ref');
@@ -404,7 +415,17 @@
                         break;
                 }
 
-                var onFlipShowComplete = function() {
+                var onFlipShowComplete = function () {
+                    // return the scroll position to the correct location after unexpected reset of the scroll to the top after multiple flip-animation compliting. RP-2192
+                    var preventNextScroll = function () {
+                        var preventFunc = function (e) {
+                            trapScroll();
+                            e.preventDefault();
+                            window.removeEventListener("scroll", preventFunc);
+                        }
+                        window.addEventListener("scroll", preventFunc);
+                    }
+
                     var trapScroll = _trapScrollLoc(parentId);
                     $ax.visibility.SetIdVisible(childId, true);
 
@@ -413,6 +434,7 @@
                     trapScroll();
 
                     onComplete();
+                    preventNextScroll();
                 };
 
                 innerContainer.css({
@@ -631,13 +653,14 @@
             var newBoundingRect = $ax('#' + stateId).childrenBoundingRect();
             var width = newBoundingRect.right;
             var height = newBoundingRect.bottom;
-            var oldBoundingRect = $ax('#' + id).size();
+            var oldBoundingRect = $ax('#' + id).offsetBoundingRect();
             var oldWidth = oldBoundingRect.right;
             var oldHeight = oldBoundingRect.bottom;
             resized = width != oldWidth || height != oldHeight;
             //resized = width != oldState.width() || height != oldState.height();
 
             $ax.visibility.setResizedSize(id, $obj(id).percentWidth ? oldWidth : width, height);
+            $ax.visibility.setResizingRect(id, oldBoundingRect);
         }
 
         //edge case for sliding
@@ -1343,5 +1366,6 @@
 
     var HIDDEN_CLASS = _visibility.HIDDEN_CLASS = 'ax_default_hidden';
     var UNPLACED_CLASS = _visibility.UNPLACED_CLASS = 'ax_default_unplaced';
+    var SELECTED_ClASS = 'selected';
 
 });

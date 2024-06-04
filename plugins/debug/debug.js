@@ -88,8 +88,6 @@
 
                 currentStack[currentStack.length - 1].append($(addToStack));
             } else if (message == 'axInfo') {
-                lastMessageType = message;
-
                 var addToStack = "<div class='axInfoContainer'>";
                 addToStack += "    <div class='axInfoItem'>" + data.item + "</div>";
                 if (data.description) { addToStack += "    <div class='axInfoDescription' title='" + data.longDescription + "'>" + data.description + "</div>" };
@@ -106,9 +104,6 @@
             else if (traceStr == 1) starttrace();
             else if (traceStr == 0) stoptrace_click();
             $axure.messageCenter.postMessage('getGlobalVariables', '');
-            $.get('shouldShowConsoleHint', function(shouldShow) {
-                if(shouldShow) showConsoleHint();
-            });
             return false;
         });
 
@@ -187,7 +182,9 @@
             $axure.player.setVarInCurrentUrlHash(TRACE_VAR_NAME, 1);
             pluginStarted = true;
 
-            $.get("consoleShown");
+            if (!$axure.document.configuration.isAxshare) {
+                $.get("consoleShown");
+            }
         }
 
         function hideEmptyState() {
@@ -245,23 +242,4 @@
 
         $('#debugHost').append(pageNotesUi);
     }
-
-    function showConsoleHint() {
-        var consoleHint = $("<div class='pluginHint'><b>Reminder:</b> Use the console to see when events and actions are performed.</div>");
-        var btn = $("#debugHostBtn").append(consoleHint);
-
-        var delay = 4000;
-        function runTimeout() {
-            return setTimeout(() => {
-                consoleHint.remove();
-            }, delay);
-        }
-        var timeoutId = runTimeout();
-        btn.mouseenter(() => { clearTimeout(timeoutId); });
-        btn.mouseleave(() => { timeoutId = runTimeout(); });
-        btn.click(() => {
-            clearTimeout(timeoutId);
-            consoleHint.remove();
-        });
-    }
-})();   
+})();

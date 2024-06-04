@@ -233,7 +233,7 @@ $axure.internal(function($ax) {
                     var fixedParentPanelId = undefined;
                     for(var j = 0; j < parents.length; j++) {
                         var parentId = parents[j];
-                        if($jobj(parentId).css('z-index') != 'auto' || $ax.features.supports.mobile) {
+                        if ($ax.visibility.IsIdVisible(parentId) && ($jobj(parentId).css('z-index') != 'auto' || $ax.features.supports.mobile)) {
                             fixedParentPanelId = parents[j];
                             break;
                         }
@@ -1257,7 +1257,7 @@ $axure.internal(function($ax) {
         }
     };
 
-    var _populateBoundingRect = function (boundingRect) {
+    var _populateBoundingRect = function(boundingRect) {
         boundingRect.right = boundingRect.left + boundingRect.width;
         boundingRect.bottom = boundingRect.top + boundingRect.height;
 

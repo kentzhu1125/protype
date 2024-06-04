@@ -506,10 +506,17 @@ $axure.internal(function ($ax) {
     var _showCaseLinks = function(eventInfo, linksId) {
         var links = window.document.getElementById(linksId);
 
-        links.style.top = eventInfo.pageY;
+        var spacing = 5;
+        var left = eventInfo.cursor.x;
+        var windowWidth = window.innerWidth + window.scrollx;
+        if (left + links.clientWidth + spacing > windowWidth) left = windowWidth - links.clientWidth - spacing;
+        links.style.left = left + 'px';
 
-        var left = eventInfo.pageX;
-        links.style.left = left;
+        var top = eventInfo.cursor.y;
+        var windowHeight = window.innerHeight + window.scrollY;
+        if (top + links.clientHeight + spacing > windowHeight) top = windowHeight - links.clientHeight - spacing;
+        links.style.top = top + 'px';
+
         $ax.visibility.SetVisible(links, true);
         $ax.legacy.BringToFront(linksId, true);
         // Switch to using jquery if this is still needed. Really old legacy code, likely for a browser no longer supported. 
@@ -723,6 +730,20 @@ $axure.internal(function ($ax) {
         }
     };
 
+    var _attachFocusAndBlur = function($query) {
+        $query.focus(function () {
+            if(window.shouldOutline) {
+                $(this).css('outline', '');
+            } else {
+                $(this).css('outline', 'none');
+            }
+            window.lastFocusedClickable = this;
+        }).blur(function () {
+            if(window.lastFocusedClickable == this) window.lastFocusedClickable = null;
+        });
+    }
+    _event.attachFocusAndBlur = _attachFocusAndBlur;
+
     // TODO: It may be a good idea to split this into multiple functions, or at least pull out more similar functions into private methods
     var _initializeObjectEvents = function(query, refreshType) {
         var skipSelectedIds = new Set();
@@ -732,6 +753,19 @@ $axure.internal(function ($ax) {
             var itemId = $ax.repeater.getItemIdFromElementId(elementId);
 
             const isItem = itemId && $ax.public.fn.IsRepeater(dObj.type);
+
+            if(dObj.tabbable) {
+                if($ax.public.fn.IsLayer(dObj.type)) _event.layerMapFocus(dObj, elementId);
+                var focusableId = _event.getFocusableWidgetOrChildId(elementId);
+                var $focusable = $('#' + focusableId);
+                $focusable.attr("tabIndex", 0);
+                if($focusable.is('div') || $focusable.is('img')) {
+                    $focusable.bind($ax.features.eventNames.mouseDownName, function () {
+                        window.shouldOutline = false;
+                    });
+                    _attachFocusAndBlur($focusable);
+                }
+            }
 
             // Focus has to be done before on focus fires
             // Set up focus
@@ -1194,11 +1228,13 @@ $axure.internal(function ($ax) {
                         e.originalEvent.handled = true;
                     };
                 } else {
+                    var selected = $ax.style.IsWidgetSelected(elementId);
+                    if (selected) $ax.style.SetWidgetSelected(elementId, selected, true);
+
                     onClick = function(e) {
                         $ax.style.SetWidgetSelected(elementId, !$ax.style.IsWidgetSelected(elementId), true);
                         if(!$ax.style.IsWidgetDisabled(elementId)) e.originalEvent.handled = true;
                     };
-                  
                 }
                 input.click(onClick);
 

@@ -457,8 +457,8 @@
     
     var urlWithStartHtml = function(url) {
         var pageName = url.substring(0, url.lastIndexOf('.html'));
-        var pageHash = $axure.utils.setHashStringVar(START_URL_NAME, PAGE_URL_NAME, pageName);
-        return START_URL_NAME + pageHash;
+        var pageQuery = $axure.utils.setHashStringVar(START_URL_NAME, PAGE_URL_NAME, pageName);
+        return START_URL_NAME + pageQuery;
     }
     
     var urlWithCollapseSitemap = function(url) {
@@ -686,9 +686,15 @@
 
                 var srcId = eventInfo.srcElement;
 
-                var isResize = action.parentEventType == 'onResize';
+                var isResize = action.parentEventType == 'onResize' || action.parentEventType == 'onPanelStateChange';
+
                 //if it's resizing, use the old rect for the threshold and clamp; otherwise, use the current rect
-                var clampRect = isResize ? $ax.visibility.getResizingRect(srcId) : $ax('#' + srcId).offsetBoundingRect(true);
+                var obj = $obj(srcId);
+                var clampRect = $ax('#' + srcId).offsetBoundingRect(true);
+                if(isResize) {
+                    var oldRect = $ax.visibility.getResizingRect(srcId);
+                    if(oldRect) clampRect = oldRect;
+                }
 
                 $ax.dynamicPanelManager.compressMove(srcId, below, isResize, clampRect, moveInfo.options.easing, moveInfo.options.duration, below ? yDelta : xDelta, below ? xDelta : yDelta);
                 continue;
@@ -1267,6 +1273,13 @@
         var idToResizeMoveState = _getIdToResizeMoveState(eventInfoCopy);
 
         var animations = [];
+
+        // set fitToContent to false if resize the dynamic panel itself
+        if($ax.public.fn.IsDynamicPanel(axObject.type)) {
+            axObject.fitToContent = false;
+            $('#' + axObject.scriptIds[0]).css('overflow', 'hidden');
+        }
+        
         if($ax.public.fn.IsLayer(axObject.type)) {
             moves = true; // Assume widgets will move will layer, even though not all widgets may move
             var childrenIds = $ax.public.fn.getLayerChildrenDeep(elementId, true, true);
