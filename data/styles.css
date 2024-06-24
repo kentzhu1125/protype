@@ -271,4 +271,8 @@
   text-align:center;
   line-height:normal;
 }
+._图片1 {
+  font-size:13px;
+  color:#000000;
+}
 textarea, select, input, button { outline: none; }
