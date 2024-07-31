@@ -1142,8 +1142,8 @@
 #u24 {
   border-width:0px;
   position:absolute;
-  left:920px;
-  top:650px;
+  left:959px;
+  top:666px;
   width:0px;
   height:0px;
 }
@@ -1151,39 +1151,39 @@
   border-width:0px;
   position:absolute;
   left:-5px;
-  top:0px;
+  top:-20px;
   width:10px;
-  height:6px;
+  height:20px;
 }
 #u24_seg1 {
   border-width:0px;
   position:absolute;
   left:-5px;
-  top:-4px;
-  width:765px;
+  top:-20px;
+  width:726px;
   height:10px;
 }
 #u24_seg2 {
   border-width:0px;
   position:absolute;
   left:-10px;
-  top:-7px;
+  top:-14px;
   width:20px;
   height:21px;
 }
 #u24_seg3 {
   border-width:0px;
   position:absolute;
-  left:745px;
-  top:-9px;
+  left:706px;
+  top:-25px;
   width:20px;
   height:20px;
 }
 #u24_text {
   border-width:0px;
   position:absolute;
-  left:330px;
-  top:-7px;
+  left:303px;
+  top:-23px;
   width:100px;
   word-wrap:break-word;
   text-transform:none;
